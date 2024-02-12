@@ -1,6 +1,7 @@
 package com.eskcti.catalog.admin.domain.category;
 
 import com.eskcti.catalog.admin.domain.AggregateRoot;
+import com.eskcti.catalog.admin.domain.utils.InstantUtils;
 import com.eskcti.catalog.admin.domain.validation.ValidationHandler;
 
 import java.time.Instant;
@@ -46,6 +47,16 @@ public class Category extends AggregateRoot<CategoryID> {
     @Override
     public void validate(final ValidationHandler handler) {
         new CategoryValidator(this, handler).validate();
+    }
+
+    public Category deactivate() {
+        if (getDeletedAt() == null) {
+            this.deletedAt = InstantUtils.now();
+        }
+
+        this.active = false;
+        this.updatedAt = InstantUtils.now();
+        return this;
     }
 
     @Override
