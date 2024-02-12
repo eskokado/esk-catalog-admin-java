@@ -46,4 +46,27 @@ public class CategoryTest {
                 actualException.getErrors().get(0).message()
         );
     }
+
+    @Test
+    public void givenAnInvalidEmptyName_whenCallNewCategoryAndValidate_thenShouldThrowAnError() {
+        final var expectedName = " ";
+        final var expectedErrorCount = 1;
+        final var expectedErrorMessage = "'name' should not be empty";
+        final var expectedDescription = "A categoria mais assistida";
+        final var expectedIsActive = true;
+
+        final var actualCategory = Category.newCategory(expectedName, expectedDescription, expectedIsActive);
+
+        final var actualException =
+                Assertions.assertThrows(
+                        DomainException.class,
+                        () -> actualCategory.validate(new ThrowsValidationHandler())
+                );
+
+        Assertions.assertEquals(expectedErrorCount, actualException.getErrors().size());
+        Assertions.assertEquals(
+                expectedErrorMessage,
+                actualException.getErrors().get(0).message()
+        );
+    }
 }
