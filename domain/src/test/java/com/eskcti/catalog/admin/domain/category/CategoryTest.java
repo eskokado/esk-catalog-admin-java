@@ -69,4 +69,21 @@ public class CategoryTest {
                 actualException.getErrors().get(0).message()
         );
     }
+    @Test
+    public void givenAnInvalidNameLengthLessThan3_whenCallNewCategoryAndValidate_thenShouldReceiveError() {
+        final var expectedName = "Fi ";
+        final var expectedErrorCount = 1;
+        final var expectedErrorMessage = "'name' must be between 3 and 255 characters";
+        final var expectedDescription = "A categoria mais assistida";
+        final var expectedIsActive = true;
+
+        final var actualCategory =
+                Category.newCategory(expectedName, expectedDescription, expectedIsActive);
+
+        final var actualException =
+                Assertions.assertThrows(DomainException.class, () -> actualCategory.validate(new ThrowsValidationHandler()));
+
+        Assertions.assertEquals(expectedErrorCount, actualException.getErrors().size());
+        Assertions.assertEquals(expectedErrorMessage, actualException.getErrors().get(0).message());
+    }
 }
