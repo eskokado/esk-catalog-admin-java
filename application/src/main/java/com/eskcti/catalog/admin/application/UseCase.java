@@ -1,9 +1,7 @@
 package com.eskcti.catalog.admin.application;
 
-import com.eskcti.catalog.admin.domain.Category;
+import com.eskcti.catalog.admin.domain.category.Category;
 
-public class UseCase {
-    public Category execute() {
-        return new Category();
-    }
+public abstract class UseCase<IN, OUT> {
+    public abstract OUT execute(IN anIn);
 }
