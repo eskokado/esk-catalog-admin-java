@@ -80,4 +80,39 @@ public class CreateCategoryUseCaseTest {
 
         verify(categoryGateway, times(0)).create(any());
     }
+
+    @Test
+    public void givenAValidCommandWithInactiveCategory_whenCallsCreateCategory_thenShouldReturnInactivateCategoryId() {
+        final var expectedName = "Filmes";
+        final var expectedDescription = "A categoria mais assistida";
+        final var expectedIsActive = false;
+        final var expectedCategory = Category.newCategory(expectedName, expectedDescription, expectedIsActive);
+
+        final var aCommando =
+                CreateCategoryCommand.with(
+                        expectedName, expectedDescription, expectedIsActive
+                );
+
+        when(categoryGateway.create(any()))
+                .thenAnswer(returnsFirstArg());
+
+        final var actualOutput = useCase.execute(aCommando);
+
+        assertNotNull(actualOutput);
+        assertNotNull(actualOutput.id());
+
+        verify(categoryGateway, times(1)).create(
+                argThat(
+                        aCategory -> {
+                            return Objects.equals(expectedName, aCategory.getName())
+                                    && Objects.equals(expectedDescription, aCategory.getDescription())
+                                    && Objects.equals(expectedIsActive, aCategory.isActive())
+                                    && Objects.nonNull(aCategory.getId())
+                                    && Objects.nonNull(aCategory.getCreatedAt())
+                                    && Objects.nonNull(aCategory.getUpdatedAt())
+                                    && Objects.nonNull(aCategory.getDeletedAt());
+                        }
+                )
+        );
+    }
 }
