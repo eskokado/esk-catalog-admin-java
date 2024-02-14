@@ -63,4 +63,35 @@ public class ListCategoriesUseCaseTest {
         assertEquals(expectedPerPage, actualResult.perPage());
         assertEquals(categories.size(), actualResult.total());
     }
+
+    @Test
+    public void givenAValidQuery_whenHasNoResult_thenShouldReturnEmptyCategories() {
+        final var categories = List.<Category>of();
+
+        final var expectedPage = 0;
+        final var expectedPerPage = 0;
+        final var expectedTerms = "";
+        final var expectedSort = "createdAt";
+        final var expectedDirection = "asc";
+
+        final var aQuery =
+                new SearchQuery(expectedPage, expectedPerPage, expectedTerms, expectedSort, expectedDirection);
+
+        final var expectedPagination =
+                new Pagination<>(expectedPage, expectedPerPage, categories.size(), categories);
+
+        final var expectedItemsCount = 0;
+        final var expectedResult = expectedPagination.map(CategoryListOutput::from);
+
+        when(categoryGateway.findAll(eq(aQuery)))
+                .thenReturn(expectedPagination);
+
+        final var actualResult = useCase.execute(aQuery);
+
+        assertEquals(expectedItemsCount, actualResult.items().size());
+        assertEquals(expectedResult, actualResult);
+        assertEquals(expectedPage, actualResult.currentPage());
+        assertEquals(expectedPerPage, actualResult.perPage());
+        assertEquals(categories.size(), actualResult.total());
+    }
 }
