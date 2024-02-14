@@ -2,6 +2,7 @@ package com.eskcti.catalog.admin.application.category.retrieve.list;
 
 import com.eskcti.catalog.admin.domain.category.Category;
 import com.eskcti.catalog.admin.domain.category.CategoryGateway;
+import com.eskcti.catalog.admin.domain.exceptions.DomainException;
 import com.eskcti.catalog.admin.domain.pagination.Pagination;
 import com.eskcti.catalog.admin.domain.pagination.SearchQuery;
 import org.junit.jupiter.api.Assertions;
@@ -93,5 +94,28 @@ public class ListCategoriesUseCaseTest {
         assertEquals(expectedPage, actualResult.currentPage());
         assertEquals(expectedPerPage, actualResult.perPage());
         assertEquals(categories.size(), actualResult.total());
+    }
+
+    @Test
+    public void givenAValidQuery_whenGatewayThrowsException_thenShouldReturnException() {
+        final var expectedPage = 0;
+        final var expectedPerPage = 0;
+        final var expectedTerms = "";
+        final var expectedSort = "createdAt";
+        final var expectedDirection = "asc";
+        final var expectedErrorMessage = "Gateway error";
+
+        final var aQuery =
+                new SearchQuery(expectedPage, expectedPerPage, expectedTerms, expectedSort, expectedDirection);
+
+        when(categoryGateway.findAll(eq(aQuery)))
+                .thenThrow(new IllegalStateException(expectedErrorMessage));
+
+        final var actualException = assertThrows(
+                IllegalStateException.class,
+                () -> useCase.execute(aQuery)
+        );
+
+        assertEquals(expectedErrorMessage, actualException.getMessage());
     }
 }
