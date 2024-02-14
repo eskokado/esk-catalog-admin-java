@@ -70,4 +70,21 @@ public class GetCategoryByIdUseCaseTest {
         assertEquals(expectedErrorMessage, actualException.getMessage());
         assertEquals(expectedErrorCount, actualException.getErrors().size());
     }
+
+    @Test
+    public void givenAValidId_whenGatewayThrowsException_thenShouldReturnException() {
+        final var expectedId = CategoryID.from("123");
+        final var expectedErrorMessage = "Gateway message";
+        final var expectedErrorCount = 1;
+
+        when(categoryGateway.findById(eq(expectedId)))
+                .thenThrow(new IllegalStateException(expectedErrorMessage));
+
+        final var actualException = assertThrows(
+                IllegalStateException.class,
+                () -> useCase.execute(expectedId.getValue())
+        );
+
+        assertEquals(expectedErrorMessage, actualException.getMessage());
+    }
 }
