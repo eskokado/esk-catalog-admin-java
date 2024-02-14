@@ -13,6 +13,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.Objects;
 import java.util.Optional;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.AdditionalAnswers.returnsFirstArg;
 import static org.mockito.ArgumentMatchers.any;
@@ -74,4 +75,35 @@ public class UpdateCategoryUseCaseTest {
         );
     }
 
+    @Test
+    public void givenAnInvalidName_whenCallsUpdateCategory_thenShouldReturnDomainException() {
+        final var aCategory = Category.newCategory("Film", null, true);
+
+        final String expectedName = null;
+        final var expectedDescription = "A categoria mais assistida";
+        final var expectedIsActive = true;
+        final var expectedErrorMessage = "'name' should not be null";
+        final var expectedErrorCount = 1;
+
+        final var expectedId = aCategory.getId();
+
+        when(categoryGateway.findById(eq(expectedId)))
+                .thenReturn(Optional.of(Category.with(aCategory)));
+
+        final var aCommando =
+                UpdateCategoryCommand.with(
+                        expectedId.getValue(),
+                        expectedName,
+                        expectedDescription,
+                        expectedIsActive
+                );
+
+
+        final var notification = useCase.execute(aCommando).getLeft();
+
+        assertEquals(expectedErrorMessage, notification.firstError().message());
+        assertEquals(expectedErrorCount, notification.getErrors().size());
+
+        verify(categoryGateway, times(0)).update(any());
+    }
 }
