@@ -51,4 +51,17 @@ public class DeleteCategoryUseCaseTest {
     }
 
 
+    @Test
+    public void givenAnInvalidId_whenCallsDeleteCategory_thenShouldReturnsBeOk() {
+        final var expectedId = CategoryID.from("123");
+
+        doNothing()
+                .when(categoryGateway)
+                .deleteById(eq(expectedId));
+
+        assertDoesNotThrow(() -> useCase.execute(expectedId.getValue()));
+
+        verify(categoryGateway, times(1)).deleteById(eq(expectedId));
+    }
+
 }
