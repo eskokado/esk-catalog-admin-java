@@ -3,6 +3,8 @@ package com.eskcti.catalog.admin.application.category.update;
 import com.eskcti.catalog.admin.application.category.create.CreateCategoryCommand;
 import com.eskcti.catalog.admin.domain.category.Category;
 import com.eskcti.catalog.admin.domain.category.CategoryGateway;
+import com.eskcti.catalog.admin.domain.category.CategoryID;
+import com.eskcti.catalog.admin.domain.exceptions.DomainException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -201,5 +203,37 @@ public class UpdateCategoryUseCaseTest {
                         }
                 )
         );
+    }
+
+    @Test
+    public void givenACommandWithInvalidID_whenCallsUpdateCategory_thenShouldReturnNotFoundException() {
+        final var expectedName = "Filmes";
+        final var expectedDescription = "A categoria mais assistida";
+        final var expectedIsActive = false;
+        final var expectedId = "123";
+        final var expectedErrorMessage = "Category with ID 123 was not found";
+        final var expectedErrorCount = 1;
+
+        final var aCommando =
+                UpdateCategoryCommand.with(
+                        expectedId,
+                        expectedName,
+                        expectedDescription,
+                        expectedIsActive
+                );
+
+
+        when(categoryGateway.findById(CategoryID.from(expectedId)))
+                .thenReturn(Optional.empty());
+
+        final var actualException =
+                assertThrows(DomainException.class, () -> useCase.execute(aCommando));
+
+        assertEquals(expectedErrorMessage, actualException.getMessage());
+        assertEquals(expectedErrorCount, actualException.getErrors().size());
+
+        verify(categoryGateway, times(1)).findById(eq(CategoryID.from(expectedId)));
+
+        verify(categoryGateway, times(0)).update(any());
     }
 }
