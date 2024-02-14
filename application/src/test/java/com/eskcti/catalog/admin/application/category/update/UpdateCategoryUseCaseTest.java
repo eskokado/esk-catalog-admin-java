@@ -155,4 +155,51 @@ public class UpdateCategoryUseCaseTest {
                 )
         );
     }
+
+    @Test
+    public void givenAValidCommand_whenGatewayThrowsRandomException_shouldReturnException() {
+        final var aCategory = Category.newCategory("Film", null, true);
+
+        final var expectedName = "Filmes";
+        final var expectedDescription = "A categoria mais assistida";
+        final var expectedIsActive = true;
+        final var expectedErrorMessage = "Gateway error";
+        final var expectedErrorCount = 1;
+        final var expectedId = aCategory.getId();
+
+        final var aCommando =
+                UpdateCategoryCommand.with(
+                        expectedId.getValue(),
+                        expectedName,
+                        expectedDescription,
+                        expectedIsActive
+                );
+
+        when(categoryGateway.findById(eq(expectedId)))
+                .thenReturn(Optional.of(Category.with(aCategory)));
+
+        when(categoryGateway.update(any()))
+                .thenThrow(new IllegalStateException(expectedErrorMessage));
+
+        final var notification = useCase.execute(aCommando).getLeft();
+
+        assertEquals(expectedErrorMessage, notification.firstError().message());
+        assertEquals(expectedErrorCount, notification.getErrors().size());
+
+        verify(categoryGateway, times(1)).findById(eq(expectedId));
+
+        verify(categoryGateway, times(1)).update(
+                argThat(
+                        anUpdateCategory -> {
+                            return Objects.equals(expectedName, anUpdateCategory.getName())
+                                    && Objects.equals(expectedDescription, anUpdateCategory.getDescription())
+                                    && Objects.equals(expectedIsActive, anUpdateCategory.isActive())
+                                    && Objects.equals(expectedId, anUpdateCategory.getId())
+                                    && Objects.equals(aCategory.getCreatedAt(), anUpdateCategory.getCreatedAt())
+                                    && aCategory.getUpdatedAt().isBefore(anUpdateCategory.getUpdatedAt())
+                                    && Objects.isNull(anUpdateCategory.getDeletedAt());
+                        }
+                )
+        );
+    }
 }
