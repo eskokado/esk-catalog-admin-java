@@ -4,6 +4,7 @@ import com.eskcti.catalog.admin.domain.category.Category;
 import com.eskcti.catalog.admin.domain.category.CategoryGateway;
 import com.eskcti.catalog.admin.domain.exceptions.DomainException;
 import com.eskcti.catalog.admin.domain.validation.handler.Notification;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -24,6 +25,16 @@ public class CreateCategoryUseCaseTest {
 
     @Mock
     private CategoryGateway categoryGateway;
+
+    @BeforeEach
+    void cleanUp() {
+        reset(categoryGateway);
+    }
+
+    // 1. Teste do caminho feliz
+    // 2. Teste passando uma propriedade inválida (name)
+    // 3. Teste criando uma categoria inativa
+    // 4. Teste simulando um erro generico vindo do gateway
 
     @Test
     public void givenAValidCommand_whenCallsCreateCategory_shouldReturnCategoryId() {

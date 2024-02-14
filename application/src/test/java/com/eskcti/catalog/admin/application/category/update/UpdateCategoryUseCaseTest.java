@@ -5,6 +5,7 @@ import com.eskcti.catalog.admin.domain.category.Category;
 import com.eskcti.catalog.admin.domain.category.CategoryGateway;
 import com.eskcti.catalog.admin.domain.category.CategoryID;
 import com.eskcti.catalog.admin.domain.exceptions.DomainException;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -28,6 +29,17 @@ public class UpdateCategoryUseCaseTest {
 
     @Mock
     private CategoryGateway categoryGateway;
+
+    @BeforeEach
+    void cleanUp() {
+        reset(categoryGateway);
+    }
+
+    // 1. Teste do caminho feliz
+    // 2. Teste passando uma propriedade inválida (name)
+    // 3. Teste altualizando uma categoria para inativa
+    // 4. Teste simulando um erro generico vindo do gateway
+    // 5. Teste atualizar categoria passando ID inválido
 
     @Test
     public void givenAValidCommand_whenCallsUpdateCategory_shouldReturnCategoryId() {
