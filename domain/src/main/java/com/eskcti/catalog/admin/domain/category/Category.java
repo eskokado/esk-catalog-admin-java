@@ -45,7 +45,7 @@ public class Category extends AggregateRoot<CategoryID> {
     }
 
     public static Category with(final Category aCategory) {
-        return new Category(
+        return with(
                 aCategory.id,
                 aCategory.name,
                 aCategory.description,
@@ -53,6 +53,26 @@ public class Category extends AggregateRoot<CategoryID> {
                 aCategory.createdAt,
                 aCategory.updatedAt,
                 aCategory.deletedAt
+        );
+    }
+
+    public static Category with(
+            final CategoryID id,
+            final String name,
+            final String description,
+            final boolean active,
+            final Instant createdAt,
+            final Instant updateddAt,
+            final Instant deletedAt
+    ) {
+        return new Category(
+                id,
+                name,
+                description,
+                active,
+                createdAt,
+                updateddAt,
+                deletedAt
         );
     }
 
