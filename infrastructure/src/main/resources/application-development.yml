@@ -4,6 +4,17 @@ mysql:
   schema: adm_videos
   url: localhost:3306
 
+spring:
+  jpa:
+    defer-datasource-initialization: true
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+        use_sql_comments: true
+    hibernate:
+      ddl-auto: none
+
 server:
   port: 8080
   undertow:
