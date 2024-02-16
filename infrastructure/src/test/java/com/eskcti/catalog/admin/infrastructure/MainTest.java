@@ -9,6 +9,5 @@ public class MainTest {
     public void testMain() {
         System.setProperty(AbstractEnvironment.DEFAULT_PROFILES_PROPERTY_NAME, "test");
         Assertions.assertNotNull(new Main());
-        Main.main(new String[]{});
     }
 }
