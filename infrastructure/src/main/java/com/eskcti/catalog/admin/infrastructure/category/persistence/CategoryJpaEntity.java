@@ -28,7 +28,7 @@ public class CategoryJpaEntity {
     private Instant createdAt;
 
     @Column(name = "updated_at", nullable = false, columnDefinition = "DATETIME(6)")
-    private Instant updateddAt;
+    private Instant updatedAt;
 
     @Column(name = "deleted_at", columnDefinition = "DATETIME(6)")
     private Instant deletedAt;
@@ -42,7 +42,7 @@ public class CategoryJpaEntity {
             final String description,
             final boolean active,
             final Instant createdAt,
-            final Instant updateddAt,
+            final Instant updatedAt,
             final Instant deletedAt
     ) {
         this.id = id;
@@ -50,7 +50,7 @@ public class CategoryJpaEntity {
         this.description = description;
         this.active = active;
         this.createdAt = createdAt;
-        this.updateddAt = updateddAt;
+        this.updatedAt = updatedAt;
         this.deletedAt = deletedAt;
     }
 
@@ -66,14 +66,14 @@ public class CategoryJpaEntity {
         );
     }
 
-    public Category toAggregate(final CategoryJpaEntity entity) {
+    public Category toAggregate() {
         return Category.with(
                 CategoryID.from(getId()),
                 getName(),
                 getDescription(),
                 isActive(),
                 getCreatedAt(),
-                getUpdateddAt(),
+                getUpdatedAt(),
                 getDeletedAt()
         );
     }
@@ -118,12 +118,12 @@ public class CategoryJpaEntity {
         this.createdAt = createdAt;
     }
 
-    public Instant getUpdateddAt() {
-        return updateddAt;
+    public Instant getUpdatedAt() {
+        return updatedAt;
     }
 
-    public void setUpdateddAt(Instant updateddAt) {
-        this.updateddAt = updateddAt;
+    public void setUpdatedAt(Instant updateddAt) {
+        this.updatedAt = updateddAt;
     }
 
     public Instant getDeletedAt() {
