@@ -2,7 +2,6 @@ package com.eskcti.catalog.admin.infrastructure.category;
 
 import com.eskcti.catalog.admin.domain.category.Category;
 import com.eskcti.catalog.admin.infrastructure.category.persistence.CategoryRepository;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
