@@ -60,4 +60,28 @@ public class CategoryRepositoryTest {
         Assertions.assertEquals(expectedPropertyName, actualCause.getPropertyName());
         Assertions.assertEquals(expectedErrorMessage, actualCause.getMessage());
     }
+
+    @Test
+    public void givenAnInvalidNullUpdatedAt_whenCallsSave_thenShouldReturnError() {
+        final var expectedPropertyName = "updatedAt";
+        final var expectedErrorMessage = "not-null property references a null or transient value : com.eskcti.catalog.admin.infrastructure.category.persistence.CategoryJpaEntity.updatedAt";
+
+        Category aCategory = Category.newCategory("Filmes", "A categoria mais assistida", true);
+
+        final var anEntity = CategoryJpaEntity.from(aCategory);
+        anEntity.setUpdatedAt(null);
+
+        final var actualException =
+                Assertions.assertThrows(
+                        DataIntegrityViolationException.class,
+                        () -> categoryRepository.save(anEntity)
+                );
+
+        final var actualCause = Assertions.assertInstanceOf(
+                PropertyValueException.class, actualException.getCause()
+        );
+
+        Assertions.assertEquals(expectedPropertyName, actualCause.getPropertyName());
+        Assertions.assertEquals(expectedErrorMessage, actualCause.getMessage());
+    }
 }
