@@ -100,4 +100,19 @@ public class CategoryMySQLGatewayTest {
         assertEquals(aCategory.getDeletedAt(), actualEntity.getDeletedAt());
         assertNull(actualEntity.getDeletedAt());
     }
+
+    @Test
+    public void givenAPrePersistedCategoryAndValidCategoryId_whenTryToDeleteIt_shouldDeleteCategory() {
+        final var aCategory = Category.newCategory("Filmes", null, true);
+
+        assertEquals(0, categoryRepository.count());
+
+        categoryRepository.saveAndFlush(CategoryJpaEntity.from(aCategory));
+
+        assertEquals(1, categoryRepository.count());
+
+        categoryGateway.deleteById(aCategory.getId());
+
+        assertEquals(0, categoryRepository.count());
+    }
 }
