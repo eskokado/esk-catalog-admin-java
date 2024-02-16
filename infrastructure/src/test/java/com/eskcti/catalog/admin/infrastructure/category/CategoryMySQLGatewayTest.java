@@ -1,6 +1,7 @@
 package com.eskcti.catalog.admin.infrastructure.category;
 
 import com.eskcti.catalog.admin.domain.category.Category;
+import com.eskcti.catalog.admin.domain.category.CategoryID;
 import com.eskcti.catalog.admin.infrastructure.category.persistence.CategoryJpaEntity;
 import com.eskcti.catalog.admin.infrastructure.category.persistence.CategoryRepository;
 import org.junit.jupiter.api.Test;
@@ -114,5 +115,15 @@ public class CategoryMySQLGatewayTest {
         categoryGateway.deleteById(aCategory.getId());
 
         assertEquals(0, categoryRepository.count());
+    }
+
+    @Test
+    public void givenInvalidCategoryId_whenTryToDeletedIt_shouldDeleteCategory() {
+        assertEquals(0, categoryRepository.count());
+
+        categoryGateway.deleteById(CategoryID.from("invalid"));
+
+        assertEquals(0, categoryRepository.count());
+
     }
 }
