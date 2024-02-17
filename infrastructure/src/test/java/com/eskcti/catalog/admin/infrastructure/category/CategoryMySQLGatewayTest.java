@@ -214,4 +214,55 @@ public class CategoryMySQLGatewayTest {
         assertEquals(expectedTotal, actualResult.items().size());
     }
 
+    @Test
+    public void givenFollowPagination_whenCallsFindAllWithPage1_shouldReturnPaginated() {
+        var expectedPage = 0;
+        final var expectedPerPage = 1;
+        final var expectedTotal = 3;
+
+        final var filmes = Category.newCategory("Filmes", null, true);
+        final var series = Category.newCategory("Séries", null, true);
+        final var documentarios = Category.newCategory("Documentários", null, true);
+
+        assertEquals(0, categoryRepository.count());
+
+        categoryRepository.saveAll(List.of(
+                CategoryJpaEntity.from(filmes),
+                CategoryJpaEntity.from(series),
+                CategoryJpaEntity.from(documentarios)
+        ));
+
+        assertEquals(3, categoryRepository.count());
+
+        var query = new SearchQuery(0, 1, "", "name", "asc");
+        var actualResult = categoryGateway.findAll(query);
+
+        assertEquals(expectedPage, actualResult.currentPage());
+        assertEquals(expectedPerPage, actualResult.perPage());
+        assertEquals(expectedTotal, actualResult.total());
+        assertEquals(expectedPerPage, actualResult.items().size());
+        assertEquals(documentarios.getId(), actualResult.items().get(0).getId());
+
+        // Page 1
+        expectedPage = 1;
+        query = new SearchQuery(1, 1, "", "name", "asc");
+        actualResult = categoryGateway.findAll(query);
+
+        assertEquals(expectedPage, actualResult.currentPage());
+        assertEquals(expectedPerPage, actualResult.perPage());
+        assertEquals(expectedTotal, actualResult.total());
+        assertEquals(expectedPerPage, actualResult.items().size());
+        assertEquals(filmes.getId(), actualResult.items().get(0).getId());
+
+        // Page 2
+        expectedPage = 2;
+        query = new SearchQuery(2, 1, "", "name", "asc");
+        actualResult = categoryGateway.findAll(query);
+
+        assertEquals(expectedPage, actualResult.currentPage());
+        assertEquals(expectedPerPage, actualResult.perPage());
+        assertEquals(expectedTotal, actualResult.total());
+        assertEquals(expectedPerPage, actualResult.items().size());
+        assertEquals(series.getId(), actualResult.items().get(0).getId());
+    }
 }
