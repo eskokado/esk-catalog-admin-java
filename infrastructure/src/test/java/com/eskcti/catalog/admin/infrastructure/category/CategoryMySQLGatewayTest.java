@@ -153,4 +153,13 @@ public class CategoryMySQLGatewayTest {
         assertEquals(aCategory.getDeletedAt(), actualCategory.getDeletedAt());
         assertNull(actualCategory.getDeletedAt());
     }
+
+    @Test
+    public void givenValidCategoryIdNotStored_whenCallsFindById_shouldReturnEmpty() {
+        assertEquals(0, categoryRepository.count());
+
+        final var actualCategory = categoryGateway.findById(CategoryID.from("empty"));
+
+        assertTrue(actualCategory.isEmpty());
+    }
 }
