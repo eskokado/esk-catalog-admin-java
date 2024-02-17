@@ -197,4 +197,21 @@ public class CategoryMySQLGatewayTest {
         assertEquals(documentarios.getId(), actualResult.items().get(0).getId());
     }
 
+    @Test
+    public void givenEmptyCategoriesTable_whenCallsFindAll_shouldReturnEmptyPage() {
+        final var expectedPage = 0;
+        final var expectedPerPage = 1;
+        final var expectedTotal = 0;
+
+        assertEquals(0, categoryRepository.count());
+
+        final var query = new SearchQuery(0, 1, "", "name", "asc");
+        final var actualResult = categoryGateway.findAll(query);
+
+        assertEquals(expectedPage, actualResult.currentPage());
+        assertEquals(expectedPerPage, actualResult.perPage());
+        assertEquals(expectedTotal, actualResult.total());
+        assertEquals(expectedTotal, actualResult.items().size());
+    }
+
 }
