@@ -7,10 +7,18 @@ import com.eskcti.catalog.admin.domain.pagination.Pagination;
 import com.eskcti.catalog.admin.domain.pagination.SearchQuery;
 import com.eskcti.catalog.admin.infrastructure.category.persistence.CategoryJpaEntity;
 import com.eskcti.catalog.admin.infrastructure.category.persistence.CategoryRepository;
+import com.eskcti.catalog.admin.infrastructure.utils.SpecificationUtils;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
+import javax.persistence.criteria.*;
 import java.util.List;
 import java.util.Optional;
+
+import static com.eskcti.catalog.admin.infrastructure.utils.SpecificationUtils.*;
+import static org.springframework.data.domain.Sort.*;
 
 @Service
 public class CategoryMySQLGateway implements CategoryGateway {
@@ -48,7 +56,30 @@ public class CategoryMySQLGateway implements CategoryGateway {
 
     @Override
     public Pagination<Category> findAll(SearchQuery aQuery) {
-        return null;
+        // Paginação
+        final var page = PageRequest.of(
+                aQuery.page(),
+                aQuery.perPage(),
+                by(Direction.fromString(aQuery.direction()), aQuery.sort())
+        );
+
+        // Busca dinâmica pelo critério terms (name ou description)
+        final var specifications = Optional.ofNullable(aQuery.terms())
+                .filter(str -> !str.isBlank())
+                .map(str -> SpecificationUtils
+                        .<CategoryJpaEntity>like("name", str)
+                        .or(like("description", str))
+                )
+                .orElse(null);
+
+        final var pageResult =
+                this.repository.findAll(Specification.where(specifications), page);
+        return new Pagination<>(
+                pageResult.getNumber(),
+                pageResult.getSize(),
+                pageResult.getTotalElements(),
+                pageResult.map(CategoryJpaEntity::toAggregate).toList()
+        );
     }
 
     @Override
