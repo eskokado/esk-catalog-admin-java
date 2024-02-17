@@ -7,7 +7,7 @@ public final class SpecificationUtils {
 
     public static <T> Specification<T> like(final String prop, final String term) {
         return (root, query, cb) ->
-                cb.like(cb.upper(root.get(prop)), like(term.toLowerCase()));
+                cb.like(cb.lower(root.get(prop)), like(term.toLowerCase()));
     }
 
     private static String like(final String term) {

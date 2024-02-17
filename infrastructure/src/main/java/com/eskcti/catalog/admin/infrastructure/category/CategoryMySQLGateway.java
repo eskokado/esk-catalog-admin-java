@@ -66,14 +66,16 @@ public class CategoryMySQLGateway implements CategoryGateway {
         // Busca dinâmica pelo critério terms (name ou description)
         final var specifications = Optional.ofNullable(aQuery.terms())
                 .filter(str -> !str.isBlank())
-                .map(str -> SpecificationUtils
-                        .<CategoryJpaEntity>like("name", str)
-                        .or(like("description", str))
-                )
+                .map(str -> {
+                    return SpecificationUtils
+                            .<CategoryJpaEntity>like("name", str)
+                            .or(like("description", str));
+                })
                 .orElse(null);
 
         final var pageResult =
                 this.repository.findAll(Specification.where(specifications), page);
+
         return new Pagination<>(
                 pageResult.getNumber(),
                 pageResult.getSize(),
