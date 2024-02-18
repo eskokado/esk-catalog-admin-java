@@ -3,6 +3,8 @@ package com.eskcti.catalog.admin.application.category.retrieve.get;
 import com.eskcti.catalog.admin.IntegrationTest;
 import com.eskcti.catalog.admin.domain.category.Category;
 import com.eskcti.catalog.admin.domain.category.CategoryGateway;
+import com.eskcti.catalog.admin.domain.category.CategoryID;
+import com.eskcti.catalog.admin.domain.exceptions.DomainException;
 import com.eskcti.catalog.admin.infrastructure.category.persistence.CategoryJpaEntity;
 import com.eskcti.catalog.admin.infrastructure.category.persistence.CategoryRepository;
 import org.junit.jupiter.api.Test;
@@ -14,9 +16,9 @@ import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.when;
 
 @IntegrationTest
 public class GetCategoryByIdUseCaseIT {
@@ -52,6 +54,22 @@ public class GetCategoryByIdUseCaseIT {
         assertEquals(aCategory.getCreatedAt().truncatedTo(ChronoUnit.SECONDS), actualCategory.createdAt().truncatedTo(ChronoUnit.SECONDS));
         assertEquals(aCategory.getUpdatedAt().truncatedTo(ChronoUnit.SECONDS), actualCategory.updatedAt().truncatedTo(ChronoUnit.SECONDS));
         assertNull(actualCategory.deletedAt());
+    }
+
+
+    @Test
+    public void givenAnInvalidId_whenCallGetCategory_thenShouldReturnNotFound() {
+        final var expectedId = CategoryID.from("123");
+        final var expectedErrorMessage = "Category with ID 123 was not found";
+        final var expectedErrorCount = 1;
+
+        final var actualException = assertThrows(
+                DomainException.class,
+                () -> useCase.execute(expectedId.getValue())
+        );
+
+        assertEquals(expectedErrorMessage, actualException.getMessage());
+        assertEquals(expectedErrorCount, actualException.getErrors().size());
     }
 
     private void save(final Category... aCategory) {
