@@ -2,11 +2,17 @@ package com.eskcti.catalog.admin.application.category.create;
 
 import com.eskcti.catalog.admin.IntegrationTest;
 import com.eskcti.catalog.admin.domain.category.Category;
+import com.eskcti.catalog.admin.domain.category.CategoryGateway;
 import com.eskcti.catalog.admin.infrastructure.category.persistence.CategoryRepository;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.mock.mockito.SpyBean;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 @IntegrationTest
 public class CreateCategoryUseCaseIT {
@@ -16,6 +22,9 @@ public class CreateCategoryUseCaseIT {
 
     @Autowired
     private CategoryRepository categoryRepository;
+
+    @SpyBean
+    private CategoryGateway categoryGateway;
 
     @Test
     public void givenAValidCommand_whenCallsCreateCategory_shouldReturnCategoryId() {
@@ -47,5 +56,26 @@ public class CreateCategoryUseCaseIT {
         assertNull(actualCategory.getDeletedAt());
 
     }
+    @Test
+    public void givenAnInvalidName_whenCallsCreateCategory_thenShouldReturnDomainException() {
+        final String expectedName = null;
+        final var expectedDescription = "A categoria mais assistida";
+        final var expectedIsActive = true;
+        final var expectedErrorMessage = "'name' should not be null";
+        final var expectedErrorCount = 1;
 
+        final var aCommando =
+                CreateCategoryCommand.with(
+                        expectedName, expectedDescription, expectedIsActive
+                );
+
+        final var notification = useCase.execute(aCommando).getLeft();
+
+        assertEquals(expectedErrorMessage, notification.firstError().message());
+        assertEquals(expectedErrorCount, notification.getErrors().size());
+
+        assertEquals(0, categoryRepository.count());
+
+        verify(categoryGateway, times(0)).create(any());
+    }
 }
