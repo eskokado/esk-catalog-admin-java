@@ -9,6 +9,8 @@ import com.eskcti.catalog.admin.infrastructure.category.persistence.CategoryRepo
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.SpyBean;
 
@@ -33,7 +35,7 @@ public class ListCategoriesUseCaseIT {
                         Category.newCategory("Amazon Originals", "Títulos de autoria da Amazon", true),
                         Category.newCategory("Documentários", null, true),
                         Category.newCategory("Sports", null, true),
-                        Category.newCategory("Kids", null, true),
+                        Category.newCategory("Kids", "Categoria para crianças", true),
                         Category.newCategory("Séries", null, true)
                 )
                 .map(CategoryJpaEntity::from)
@@ -63,5 +65,38 @@ public class ListCategoriesUseCaseIT {
         assertEquals(expectedPerPage, actualResult.perPage());
         assertEquals(expectedTotal, actualResult.total());
     }
+
+    @ParameterizedTest
+    @CsvSource({
+            "fil,0,10,1,1,Filmes",
+            "net,0,10,1,1,Netflix Originals",
+            "ZON,0,10,1,1,Amazon Originals",
+            "KI,0,10,1,1,Kids",
+            "crianças,0,10,1,1,Kids",
+            "da Amazon,0,10,1,1,Amazon Originals",
+    })
+    public void givenAValidTerm_whenCallsListCategories_shouldReturnCategoriesFiltered(
+            final String expectedTerms,
+            final int expectedPage,
+            final int expectedPerPage,
+            final int expectedItemsCount,
+            final long expectedTotal,
+            final String expectedCategoryName
+    ) {
+        final var expectedSort = "name";
+        final var expectedDirection = "asc";
+
+        final var aQuery =
+                new SearchQuery(expectedPage, expectedPerPage, expectedTerms, expectedSort, expectedDirection);
+
+        final var actualResult = useCase.execute(aQuery);
+
+        assertEquals(expectedItemsCount, actualResult.items().size());
+        assertEquals(expectedPage, actualResult.currentPage());
+        assertEquals(expectedPerPage, actualResult.perPage());
+        assertEquals(expectedTotal, actualResult.total());
+        assertEquals(expectedCategoryName, actualResult.items().get(0).name());
+    }
+
 
 }
