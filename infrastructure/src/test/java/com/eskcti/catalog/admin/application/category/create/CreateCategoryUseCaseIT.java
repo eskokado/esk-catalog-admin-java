@@ -9,10 +9,13 @@ import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.SpyBean;
 
+import java.util.Objects;
+
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.AdditionalAnswers.returnsFirstArg;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
+import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.Mockito.*;
 
 @IntegrationTest
 public class CreateCategoryUseCaseIT {
@@ -77,5 +80,38 @@ public class CreateCategoryUseCaseIT {
         assertEquals(0, categoryRepository.count());
 
         verify(categoryGateway, times(0)).create(any());
+    }
+
+    @Test
+    public void givenAValidCommandWithInactiveCategory_whenCallsCreateCategory_thenShouldReturnInactivateCategoryId() {
+        final var expectedName = "Filmes";
+        final var expectedDescription = "A categoria mais assistida";
+        final var expectedIsActive = false;
+        final var expectedCategory = Category.newCategory(expectedName, expectedDescription, expectedIsActive);
+
+        assertEquals(0, categoryRepository.count());
+
+        final var aCommando =
+                CreateCategoryCommand.with(
+                        expectedName, expectedDescription, expectedIsActive
+                );
+
+        final var actualOutput = useCase.execute(aCommando).get();
+
+        assertNotNull(actualOutput);
+        assertNotNull(actualOutput.id());
+
+        assertEquals(1, categoryRepository.count());
+
+        verify(categoryGateway, times(1)).create(any());
+
+        final var actualCategory = categoryRepository.findById(actualOutput.id().getValue()).get();
+
+        assertEquals(expectedName, actualCategory.getName());
+        assertEquals(expectedDescription, actualCategory.getDescription());
+        assertEquals(expectedIsActive, actualCategory.isActive());
+        assertNotNull(actualCategory.getCreatedAt());
+        assertNotNull(actualCategory.getUpdatedAt());
+        assertNotNull(actualCategory.getDeletedAt());
     }
 }
