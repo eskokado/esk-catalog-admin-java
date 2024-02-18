@@ -72,6 +72,38 @@ public class UpdateCategoryUseCaseIT {
         assertNull(actualCategory.getDeletedAt());
 
     }
+
+    @Test
+    public void givenAnInvalidName_whenCallsUpdateCategory_thenShouldReturnDomainException() {
+        final var aCategory = Category.newCategory("Film", null, true);
+
+        save(aCategory);
+        assertEquals(1, categoryRepository.count());
+
+        final String expectedName = null;
+        final var expectedDescription = "A categoria mais assistida";
+        final var expectedIsActive = true;
+        final var expectedErrorMessage = "'name' should not be null";
+        final var expectedErrorCount = 1;
+
+        final var expectedId = aCategory.getId();
+
+        final var aCommando =
+                UpdateCategoryCommand.with(
+                        expectedId.getValue(),
+                        expectedName,
+                        expectedDescription,
+                        expectedIsActive
+                );
+
+
+        final var notification = useCase.execute(aCommando).getLeft();
+
+        assertEquals(expectedErrorMessage, notification.firstError().message());
+        assertEquals(expectedErrorCount, notification.getErrors().size());
+
+        verify(categoryGateway, times(0)).update(any());
+    }
     private void save(final Category... aCategory) {
         categoryRepository.saveAllAndFlush(
                 Arrays.stream(aCategory)
