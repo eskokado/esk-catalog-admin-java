@@ -5,14 +5,12 @@ import com.eskcti.catalog.admin.domain.category.Category;
 import com.eskcti.catalog.admin.domain.category.CategoryGateway;
 import com.eskcti.catalog.admin.infrastructure.category.persistence.CategoryRepository;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.SpyBean;
 
 import java.util.Objects;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.AdditionalAnswers.returnsFirstArg;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.*;
@@ -113,5 +111,29 @@ public class CreateCategoryUseCaseIT {
         assertNotNull(actualCategory.getCreatedAt());
         assertNotNull(actualCategory.getUpdatedAt());
         assertNotNull(actualCategory.getDeletedAt());
+    }
+
+    @Test
+    public void givenAValidCommand_whenGatewayThrowsRandomException_shouldReturnException() {
+        final var expectedName = "Filmes";
+        final var expectedDescription = "A categoria mais assistida";
+        final var expectedIsActive = true;
+        final var expectedErrorMessage = "Gateway error";
+        final var expectedErrorCount = 1;
+
+        final var aCommando =
+                CreateCategoryCommand.with(
+                        expectedName, expectedDescription, expectedIsActive
+                );
+
+
+        doThrow(new IllegalStateException(expectedErrorMessage))
+                .when(categoryGateway).create(any());
+
+        final var notification = useCase.execute(aCommando).getLeft();
+
+        assertEquals(expectedErrorMessage, notification.firstError().message());
+        assertEquals(expectedErrorCount, notification.getErrors().size());
+
     }
 }
