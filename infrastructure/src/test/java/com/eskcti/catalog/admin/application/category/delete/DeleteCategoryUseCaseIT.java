@@ -55,6 +55,20 @@ public class DeleteCategoryUseCaseIT {
         assertEquals(0, categoryRepository.count());
     }
 
+    @Test
+    public void givenAValidId_whenGatewayThrowsException_thenShouldReturnsException() {
+        final var aCategory = Category.newCategory("Filmes", "A categoria mais assistidas", true);
+        final var expectedId = aCategory.getId();
+
+        doThrow(new IllegalStateException("Gateway error"))
+                .when(categoryGateway)
+                .deleteById(eq(expectedId));
+
+        assertThrows(IllegalStateException.class, () -> useCase.execute(expectedId.getValue()));
+
+        verify(categoryGateway, times(1)).deleteById(eq(expectedId));
+    }
+
     private void save(final Category... aCategory) {
         categoryRepository.saveAllAndFlush(
                 Arrays.stream(aCategory)
