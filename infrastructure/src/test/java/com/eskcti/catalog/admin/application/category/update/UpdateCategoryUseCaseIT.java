@@ -104,6 +104,46 @@ public class UpdateCategoryUseCaseIT {
 
         verify(categoryGateway, times(0)).update(any());
     }
+
+    @Test
+    public void givenAValidCommandWithInactiveCategory_whenCallsUpdateCategory_thenShouldReturnInactivateCategoryId() {
+        final var aCategory = Category.newCategory("Film", null, true);
+
+        save(aCategory);
+        final var expectedName = "Filmes";
+        final var expectedDescription = "A categoria mais assistida";
+        final var expectedIsActive = false;
+        final var expectedCategory = Category.newCategory(expectedName, expectedDescription, expectedIsActive);
+
+        final var expectedId = aCategory.getId();
+
+        final var aCommando =
+                UpdateCategoryCommand.with(
+                        expectedId.getValue(),
+                        expectedName,
+                        expectedDescription,
+                        expectedIsActive
+                );
+
+        assertTrue(aCategory.isActive());
+        assertNull(aCategory.getDeletedAt());
+
+        final var actualOutput = useCase.execute(aCommando).get();
+
+        assertNotNull(actualOutput);
+        assertNotNull(actualOutput.id());
+
+        final var actualCategory = categoryRepository.findById(actualOutput.id().getValue()).get();
+
+        assertEquals(1, categoryRepository.count());
+
+        assertEquals(expectedName, actualCategory.getName());
+        assertEquals(expectedDescription, actualCategory.getDescription());
+        assertEquals(expectedIsActive, actualCategory.isActive());
+        assertNotNull(actualCategory.getCreatedAt());
+        assertTrue(aCategory.getUpdatedAt().isBefore(actualCategory.getUpdatedAt()));
+        assertNotNull(actualCategory.getDeletedAt());
+    }
     private void save(final Category... aCategory) {
         categoryRepository.saveAllAndFlush(
                 Arrays.stream(aCategory)
