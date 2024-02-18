@@ -144,6 +144,50 @@ public class UpdateCategoryUseCaseIT {
         assertTrue(aCategory.getUpdatedAt().isBefore(actualCategory.getUpdatedAt()));
         assertNotNull(actualCategory.getDeletedAt());
     }
+
+    @Test
+    public void givenAValidCommand_whenGatewayThrowsRandomException_shouldReturnException() {
+        final var aCategory = Category.newCategory("Film", null, true);
+
+        save(aCategory);
+
+        final var expectedName = "Filmes";
+        final var expectedDescription = "A categoria mais assistida";
+        final var expectedIsActive = true;
+        final var expectedErrorMessage = "Gateway error";
+        final var expectedErrorCount = 1;
+        final var expectedId = aCategory.getId();
+
+        final var aCommando =
+                UpdateCategoryCommand.with(
+                        expectedId.getValue(),
+                        expectedName,
+                        expectedDescription,
+                        expectedIsActive
+                );
+
+
+        doThrow(new IllegalStateException(expectedErrorMessage))
+                .when(categoryGateway).update(any());
+
+        final var notification = useCase.execute(aCommando).getLeft();
+
+        assertEquals(expectedErrorMessage, notification.firstError().message());
+        assertEquals(expectedErrorCount, notification.getErrors().size());
+
+        verify(categoryGateway, times(1)).findById(eq(expectedId));
+
+        final var actualCategory = categoryRepository.findById(aCategory.getId().getValue()).get();
+
+        assertEquals(1, categoryRepository.count());
+
+        assertEquals(aCategory.getName(), actualCategory.getName());
+        assertEquals(aCategory.getDescription(), actualCategory.getDescription());
+        assertEquals(aCategory.isActive(), actualCategory.isActive());
+        assertNotNull(actualCategory.getCreatedAt());
+        assertNotNull(actualCategory.getUpdatedAt());
+        assertNull(actualCategory.getDeletedAt());
+    }
     private void save(final Category... aCategory) {
         categoryRepository.saveAllAndFlush(
                 Arrays.stream(aCategory)
