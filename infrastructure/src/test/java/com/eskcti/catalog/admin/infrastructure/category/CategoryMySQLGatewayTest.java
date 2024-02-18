@@ -1,11 +1,11 @@
 package com.eskcti.catalog.admin.infrastructure.category;
 
+import com.eskcti.catalog.admin.MySQLGatewayTest;
 import com.eskcti.catalog.admin.domain.category.Category;
 import com.eskcti.catalog.admin.domain.category.CategoryID;
 import com.eskcti.catalog.admin.domain.pagination.SearchQuery;
 import com.eskcti.catalog.admin.infrastructure.category.persistence.CategoryJpaEntity;
 import com.eskcti.catalog.admin.infrastructure.category.persistence.CategoryRepository;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
