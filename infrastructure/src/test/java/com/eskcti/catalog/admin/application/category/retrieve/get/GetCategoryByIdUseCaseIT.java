@@ -18,6 +18,7 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 
 @IntegrationTest
@@ -70,6 +71,23 @@ public class GetCategoryByIdUseCaseIT {
 
         assertEquals(expectedErrorMessage, actualException.getMessage());
         assertEquals(expectedErrorCount, actualException.getErrors().size());
+    }
+
+    @Test
+    public void givenAValidId_whenGatewayThrowsException_thenShouldReturnException() {
+        final var expectedId = CategoryID.from("123");
+        final var expectedErrorMessage = "Gateway message";
+        final var expectedErrorCount = 1;
+
+        doThrow(new IllegalStateException(expectedErrorMessage))
+                .when(categoryGateway).findById(eq(expectedId));
+
+        final var actualException = assertThrows(
+                IllegalStateException.class,
+                () -> useCase.execute(expectedId.getValue())
+        );
+
+        assertEquals(expectedErrorMessage, actualException.getMessage());
     }
 
     private void save(final Category... aCategory) {
