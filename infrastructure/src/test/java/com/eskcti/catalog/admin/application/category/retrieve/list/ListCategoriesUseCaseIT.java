@@ -32,11 +32,11 @@ public class ListCategoriesUseCaseIT {
         final var categories = Stream.of(
                         Category.newCategory("Filmes", null, true),
                         Category.newCategory("Netflix Originals", "Títulos de autoria da Netflix", true),
-                        Category.newCategory("Amazon Originals", "Títulos de autoria da Amazon", true),
+                        Category.newCategory("Amazon Originals", "Títulos de autoria da Amazon Prime", true),
                         Category.newCategory("Documentários", null, true),
                         Category.newCategory("Sports", null, true),
                         Category.newCategory("Kids", "Categoria para crianças", true),
-                        Category.newCategory("Séries", null, true)
+                        Category.newCategory("Series", null, true)
                 )
                 .map(CategoryJpaEntity::from)
                 .toList();
@@ -97,6 +97,37 @@ public class ListCategoriesUseCaseIT {
         assertEquals(expectedTotal, actualResult.total());
         assertEquals(expectedCategoryName, actualResult.items().get(0).name());
     }
+
+    @ParameterizedTest
+    @CsvSource({
+            "name,asc,0,10,7,7,Amazon Originals",
+            "name,desc,0,10,7,7,Sports",
+            "createdAt,asc,0,10,7,7,Filmes",
+            "createdAt,desc,0,10,7,7,Series",
+    })
+    public void givenAValidSortAndDirection_whenCallsListCategories_thenShouldReturnCategoriesOrdered(
+            final String expectedSort,
+            final String expectedDirection,
+            final int expectedPage,
+            final int expectedPerPage,
+            final int expectedItemsCount,
+            final long expectedTotal,
+            final String expectedCategoryName
+    ) {
+        final var expectedTerms = "";
+
+        final var aQuery =
+                new SearchQuery(expectedPage, expectedPerPage, expectedTerms, expectedSort, expectedDirection);
+
+        final var actualResult = useCase.execute(aQuery);
+
+        assertEquals(expectedItemsCount, actualResult.items().size());
+        assertEquals(expectedPage, actualResult.currentPage());
+        assertEquals(expectedPerPage, actualResult.perPage());
+        assertEquals(expectedTotal, actualResult.total());
+        assertEquals(expectedCategoryName, actualResult.items().get(0).name());
+    }
+
 
 
 }
