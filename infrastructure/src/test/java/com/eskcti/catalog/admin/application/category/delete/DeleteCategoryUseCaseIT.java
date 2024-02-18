@@ -3,6 +3,7 @@ package com.eskcti.catalog.admin.application.category.delete;
 import com.eskcti.catalog.admin.IntegrationTest;
 import com.eskcti.catalog.admin.domain.category.Category;
 import com.eskcti.catalog.admin.domain.category.CategoryGateway;
+import com.eskcti.catalog.admin.domain.category.CategoryID;
 import com.eskcti.catalog.admin.infrastructure.category.persistence.CategoryJpaEntity;
 import com.eskcti.catalog.admin.infrastructure.category.persistence.CategoryRepository;
 import org.junit.jupiter.api.Test;
@@ -11,8 +12,9 @@ import org.springframework.boot.test.mock.mockito.SpyBean;
 
 import java.util.Arrays;
 
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.*;
 
 @IntegrationTest
 public class DeleteCategoryUseCaseIT {
@@ -38,6 +40,16 @@ public class DeleteCategoryUseCaseIT {
 
         assertEquals(1, categoryRepository.count());
 
+        assertDoesNotThrow(() -> useCase.execute(expectedId.getValue()));
+
+        assertEquals(0, categoryRepository.count());
+    }
+
+    @Test
+    public void givenAnInvalidId_whenCallsDeleteCategory_thenShouldReturnsBeOk() {
+        final var expectedId = CategoryID.from("123");
+
+        assertEquals(0, categoryRepository.count());
         assertDoesNotThrow(() -> useCase.execute(expectedId.getValue()));
 
         assertEquals(0, categoryRepository.count());
