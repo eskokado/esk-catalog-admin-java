@@ -3,6 +3,8 @@ package com.eskcti.catalog.admin.application.category.update;
 import com.eskcti.catalog.admin.IntegrationTest;
 import com.eskcti.catalog.admin.domain.category.Category;
 import com.eskcti.catalog.admin.domain.category.CategoryGateway;
+import com.eskcti.catalog.admin.domain.category.CategoryID;
+import com.eskcti.catalog.admin.domain.exceptions.DomainException;
 import com.eskcti.catalog.admin.infrastructure.category.persistence.CategoryJpaEntity;
 import com.eskcti.catalog.admin.infrastructure.category.persistence.CategoryRepository;
 import org.junit.jupiter.api.Test;
@@ -10,13 +12,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.SpyBean;
 
 import java.util.Arrays;
-import java.util.Objects;
-import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.AdditionalAnswers.returnsFirstArg;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
@@ -188,6 +186,36 @@ public class UpdateCategoryUseCaseIT {
         assertNotNull(actualCategory.getUpdatedAt());
         assertNull(actualCategory.getDeletedAt());
     }
+
+    @Test
+    public void givenACommandWithInvalidID_whenCallsUpdateCategory_thenShouldReturnNotFoundException() {
+        final var expectedName = "Filmes";
+        final var expectedDescription = "A categoria mais assistida";
+        final var expectedIsActive = false;
+        final var expectedId = "123";
+        final var expectedErrorMessage = "Category with ID 123 was not found";
+        final var expectedErrorCount = 1;
+
+        final var aCommando =
+                UpdateCategoryCommand.with(
+                        expectedId,
+                        expectedName,
+                        expectedDescription,
+                        expectedIsActive
+                );
+
+
+        final var actualException =
+                assertThrows(DomainException.class, () -> useCase.execute(aCommando));
+
+        assertEquals(expectedErrorMessage, actualException.getMessage());
+        assertEquals(expectedErrorCount, actualException.getErrors().size());
+
+        verify(categoryGateway, times(1)).findById(eq(CategoryID.from(expectedId)));
+
+        verify(categoryGateway, times(0)).update(any());
+    }
+
     private void save(final Category... aCategory) {
         categoryRepository.saveAllAndFlush(
                 Arrays.stream(aCategory)
