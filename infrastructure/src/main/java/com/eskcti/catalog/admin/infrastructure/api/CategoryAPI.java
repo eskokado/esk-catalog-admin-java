@@ -1,6 +1,7 @@
 package com.eskcti.catalog.admin.infrastructure.api;
 
 import com.eskcti.catalog.admin.domain.pagination.Pagination;
+import com.eskcti.catalog.admin.infrastructure.category.models.CreateCategoryRequest;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -25,7 +26,7 @@ public interface CategoryAPI {
             @ApiResponse(responseCode = "422", description = "A validation error was throw"),
             @ApiResponse(responseCode = "500", description = "An internal server error was throw")
     })
-    ResponseEntity<?> createCategory();
+    ResponseEntity<?> createCategory(CreateCategoryRequest input);
 
     @GetMapping
     @Operation(summary = "List all categories paginated")
