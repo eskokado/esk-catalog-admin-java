@@ -3,6 +3,7 @@ package com.eskcti.catalog.admin.infrastructure.api;
 import com.eskcti.catalog.admin.ControllerTest;
 import com.eskcti.catalog.admin.application.category.create.CreateCategoryOutput;
 import com.eskcti.catalog.admin.application.category.create.CreateCategoryUseCase;
+import com.eskcti.catalog.admin.domain.exceptions.DomainException;
 import com.eskcti.catalog.admin.domain.validation.Error;
 import com.eskcti.catalog.admin.domain.validation.handler.Notification;
 import com.eskcti.catalog.admin.infrastructure.category.models.CreateCategoryRequest;
@@ -101,6 +102,47 @@ public class CategoryAPITest {
                 .andExpect(header().string("Content-Type", MediaType.APPLICATION_JSON_VALUE))
                 .andExpect(jsonPath("$.errors", hasSize(1)))
                 .andExpect(jsonPath("$.errors[0].message", equalTo(expectedErrorMessage)));
+
+        verify(
+                createCategoryUseCase,
+                times(1))
+                .execute(argThat(cmd ->
+                        Objects.equals(expectedName, cmd.name()) &&
+                                Objects.equals(expectedDescription, cmd.description()) &&
+                                Objects.equals(expectedIsActive, cmd.isActive())
+                ));
+    }
+
+    @Test
+    public void givenAnInvalidCommand_whenCallsCreateCategory_thenShouldReturnDomainException() throws Exception {
+        final String expectedName = null;
+        final var expectedDescription = "A categoria mais assistida";
+        final var expectedIsActive = true;
+        final var expectedErrorMessage = "'name' should not be null";
+        final var expectedErrorCount = 1;
+
+        final var aInput =
+                new CreateCategoryRequest(
+                        expectedName, expectedDescription, expectedIsActive
+                );
+
+        when(createCategoryUseCase.execute(any()))
+                .thenThrow(DomainException.with(new Error(expectedErrorMessage)));
+
+        final var aMapper = this.mapper.writeValueAsString(aInput);
+
+        final var request = post("/categories")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(aMapper);
+
+        this.mvc.perform(request)
+                .andDo(print())
+                .andExpect(status().isUnprocessableEntity())
+                .andExpect(header().string("Location", Matchers.nullValue()))
+                .andExpect(header().string("Content-Type", MediaType.APPLICATION_JSON_VALUE))
+                .andExpect(jsonPath("$.errors", hasSize(1)))
+                .andExpect(jsonPath("$.errors[0].message", equalTo(expectedErrorMessage)))
+                .andExpect(jsonPath("$.message", equalTo(expectedErrorMessage)));
 
         verify(
                 createCategoryUseCase,
