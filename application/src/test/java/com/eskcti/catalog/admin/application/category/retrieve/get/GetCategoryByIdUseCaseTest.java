@@ -4,6 +4,7 @@ import com.eskcti.catalog.admin.domain.category.Category;
 import com.eskcti.catalog.admin.domain.category.CategoryGateway;
 import com.eskcti.catalog.admin.domain.category.CategoryID;
 import com.eskcti.catalog.admin.domain.exceptions.DomainException;
+import com.eskcti.catalog.admin.domain.exceptions.NotFoundException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -56,14 +57,14 @@ public class GetCategoryByIdUseCaseTest {
     public void givenAnInvalidId_whenCallGetCategory_thenShouldReturnNotFound() {
         final var expectedId = CategoryID.from("123");
         final var expectedErrorMessage = "Category with ID 123 was not found";
-        final var expectedErrorCount = 1;
+        final var expectedErrorCount = 0;
 
         when(categoryGateway.findById(eq(expectedId)))
                 .thenReturn(Optional.empty());
 
 
         final var actualException = assertThrows(
-                DomainException.class,
+                NotFoundException.class,
                 () -> useCase.execute(expectedId.getValue())
         );
 
