@@ -1,6 +1,7 @@
 package com.eskcti.catalog.admin.infrastructure.api;
 
 import com.eskcti.catalog.admin.domain.pagination.Pagination;
+import com.eskcti.catalog.admin.infrastructure.category.models.CategoryResponse;
 import com.eskcti.catalog.admin.infrastructure.category.models.CreateCategoryRequest;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -8,10 +9,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 
 @RequestMapping(value = "categories")
 @Tag(name = "Categories")
@@ -43,4 +41,16 @@ public interface CategoryAPI {
             @RequestParam(name = "direction", required = false, defaultValue = "asc") final int direction
     );
 
+    @GetMapping(
+            value = "{id}",
+            consumes = MediaType.APPLICATION_JSON_VALUE,
+            produces = MediaType.APPLICATION_JSON_VALUE
+    )
+    @Operation(summary = "Get a category by it's identifier")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Category retrieve successfully"),
+            @ApiResponse(responseCode = "404", description = "Category was not found"),
+            @ApiResponse(responseCode = "500", description = "An internal server error was throw")
+    })
+    CategoryResponse getById(@PathVariable(name = "id")  String id);
 }
