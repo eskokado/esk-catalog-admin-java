@@ -4,7 +4,7 @@ import com.eskcti.catalog.admin.IntegrationTest;
 import com.eskcti.catalog.admin.domain.category.Category;
 import com.eskcti.catalog.admin.domain.category.CategoryGateway;
 import com.eskcti.catalog.admin.domain.category.CategoryID;
-import com.eskcti.catalog.admin.domain.exceptions.DomainException;
+import com.eskcti.catalog.admin.domain.exceptions.NotFoundException;
 import com.eskcti.catalog.admin.infrastructure.category.persistence.CategoryJpaEntity;
 import com.eskcti.catalog.admin.infrastructure.category.persistence.CategoryRepository;
 import org.junit.jupiter.api.Test;
@@ -58,7 +58,7 @@ public class UpdateCategoryUseCaseIT {
         assertNotNull(actualOutput.id());
         assertEquals(1, categoryRepository.count());
 
-        final var actualCategory = categoryRepository.findById(actualOutput.id().getValue()).get();
+        final var actualCategory = categoryRepository.findById(actualOutput.id()).get();
 
         assertEquals(1, categoryRepository.count());
 
@@ -131,7 +131,7 @@ public class UpdateCategoryUseCaseIT {
         assertNotNull(actualOutput);
         assertNotNull(actualOutput.id());
 
-        final var actualCategory = categoryRepository.findById(actualOutput.id().getValue()).get();
+        final var actualCategory = categoryRepository.findById(actualOutput.id()).get();
 
         assertEquals(1, categoryRepository.count());
 
@@ -194,7 +194,7 @@ public class UpdateCategoryUseCaseIT {
         final var expectedIsActive = false;
         final var expectedId = "123";
         final var expectedErrorMessage = "Category with ID 123 was not found";
-        final var expectedErrorCount = 1;
+        final var expectedErrorCount = 0;
 
         final var aCommando =
                 UpdateCategoryCommand.with(
@@ -206,7 +206,7 @@ public class UpdateCategoryUseCaseIT {
 
 
         final var actualException =
-                assertThrows(DomainException.class, () -> useCase.execute(aCommando));
+                assertThrows(NotFoundException.class, () -> useCase.execute(aCommando));
 
         assertEquals(expectedErrorMessage, actualException.getMessage());
         assertEquals(expectedErrorCount, actualException.getErrors().size());

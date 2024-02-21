@@ -4,7 +4,7 @@ import com.eskcti.catalog.admin.domain.category.Category;
 import com.eskcti.catalog.admin.domain.category.CategoryGateway;
 import com.eskcti.catalog.admin.domain.category.CategoryID;
 import com.eskcti.catalog.admin.domain.exceptions.DomainException;
-import com.eskcti.catalog.admin.domain.validation.Error;
+import com.eskcti.catalog.admin.domain.exceptions.NotFoundException;
 import com.eskcti.catalog.admin.domain.validation.handler.Notification;
 import io.vavr.control.Either;
 
@@ -42,6 +42,6 @@ public class DefaultUpdateCategoryUseCase extends UpdateCategoryUseCase{
     }
 
     private static Supplier<DomainException> notFound(final CategoryID anId) {
-        return () -> DomainException.with(new Error("Category with ID %s was not found".formatted(anId.getValue())));
+        return () -> NotFoundException.with(Category.class, anId);
     }
 }
