@@ -224,7 +224,7 @@ public class UpdateCategoryUseCaseTest {
         final var expectedIsActive = false;
         final var expectedId = "123";
         final var expectedErrorMessage = "Category with ID 123 was not found";
-        final var expectedErrorCount = 1;
+        final var expectedErrorCount = 0;
 
         final var aCommando =
                 UpdateCategoryCommand.with(
