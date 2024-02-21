@@ -3,7 +3,9 @@ package com.eskcti.catalog.admin.infrastructure.api;
 import com.eskcti.catalog.admin.domain.pagination.Pagination;
 import com.eskcti.catalog.admin.infrastructure.category.models.CategoryResponse;
 import com.eskcti.catalog.admin.infrastructure.category.models.CreateCategoryRequest;
+import com.eskcti.catalog.admin.infrastructure.category.models.UpdateCategoryRequest;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -53,4 +55,17 @@ public interface CategoryAPI {
             @ApiResponse(responseCode = "500", description = "An internal server error was throw")
     })
     CategoryResponse getById(@PathVariable(name = "id")  String id);
+
+    @PutMapping(
+            value = "{id}",
+            consumes = MediaType.APPLICATION_JSON_VALUE,
+            produces = MediaType.APPLICATION_JSON_VALUE
+    )
+    @Operation(summary = "Update a category by it's identifier")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Category update successfully"),
+            @ApiResponse(responseCode = "404", description = "Category was not found"),
+            @ApiResponse(responseCode = "500", description = "An internal server error was throw")
+    })
+    ResponseEntity<?> updateById(@PathVariable(name = "id")  String id, @RequestBody UpdateCategoryRequest input);
 }
