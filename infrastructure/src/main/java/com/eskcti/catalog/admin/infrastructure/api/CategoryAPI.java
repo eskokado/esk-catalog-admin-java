@@ -57,7 +57,7 @@ public interface CategoryAPI {
     CategoryResponse getById(@PathVariable(name = "id")  String id);
 
     @PutMapping(
-            value = "{id}",
+            value = "/{id}",
             consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE
     )

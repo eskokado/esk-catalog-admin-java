@@ -3,6 +3,7 @@ package com.eskcti.catalog.admin.infrastructure.api.controllers;
 import com.eskcti.catalog.admin.application.category.create.CreateCategoryCommand;
 import com.eskcti.catalog.admin.application.category.create.CreateCategoryOutput;
 import com.eskcti.catalog.admin.application.category.create.CreateCategoryUseCase;
+import com.eskcti.catalog.admin.application.category.retrieve.get.CategoryOutput;
 import com.eskcti.catalog.admin.application.category.retrieve.get.GetCatetoryByIdUseCase;
 import com.eskcti.catalog.admin.application.category.update.UpdateCategoryCommand;
 import com.eskcti.catalog.admin.application.category.update.UpdateCategoryOutput;
@@ -78,7 +79,7 @@ public class CategoryController implements CategoryAPI {
                 notification -> ResponseEntity.unprocessableEntity().body(notification);
 
         final Function<UpdateCategoryOutput, ResponseEntity<?>> onSuccess =
-                output -> ResponseEntity.ok(output.id());
+                ResponseEntity::ok;
 
         return this.updateCategoryUseCase.execute(aCommand)
                 .fold(onError, onSuccess);
