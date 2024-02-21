@@ -5,6 +5,8 @@ import com.eskcti.catalog.admin.application.category.create.CreateCategoryOutput
 import com.eskcti.catalog.admin.application.category.create.CreateCategoryUseCase;
 import com.eskcti.catalog.admin.application.category.retrieve.get.CategoryOutput;
 import com.eskcti.catalog.admin.application.category.retrieve.get.GetCatetoryByIdUseCase;
+import com.eskcti.catalog.admin.application.category.update.UpdateCategoryOutput;
+import com.eskcti.catalog.admin.application.category.update.UpdateCategoryUseCase;
 import com.eskcti.catalog.admin.domain.category.Category;
 import com.eskcti.catalog.admin.domain.category.CategoryID;
 import com.eskcti.catalog.admin.domain.exceptions.DomainException;
@@ -12,6 +14,7 @@ import com.eskcti.catalog.admin.domain.exceptions.NotFoundException;
 import com.eskcti.catalog.admin.domain.validation.Error;
 import com.eskcti.catalog.admin.domain.validation.handler.Notification;
 import com.eskcti.catalog.admin.infrastructure.category.models.CreateCategoryRequest;
+import com.eskcti.catalog.admin.infrastructure.category.models.UpdateCategoryRequest;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Test;
@@ -24,11 +27,9 @@ import java.util.Objects;
 
 import static io.vavr.API.Left;
 import static io.vavr.API.Right;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.*;
 import static org.mockito.Mockito.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -45,6 +46,9 @@ public class CategoryAPITest {
 
     @MockBean
     private GetCatetoryByIdUseCase getCatetoryByIdUseCase;
+
+    @MockBean
+    private UpdateCategoryUseCase updateCategoryUseCase;
 
     @Test
     public void givenAValidCommand_whenCallsCreateCategory_shouldReturnCategoryId() throws Exception {
@@ -238,5 +242,47 @@ public class CategoryAPITest {
         // then
         response.andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.message", equalTo(expectedErrorMessage)));
+    }
+
+    @Test
+    public void givenAValidCommand_whenCallsUpdateCategory_shouldReturnCategoryId() throws Exception {
+        // given
+        final var expectedId = "123";
+        final var expectedName = "Filmes";
+        final var expectedDescription = "A categoria mais assistida";
+        final var expectedIsActive = true;
+
+        final var aInput =
+                new UpdateCategoryRequest(
+                        expectedName, expectedDescription, expectedIsActive
+                );
+
+        when(updateCategoryUseCase.execute(any()))
+                .thenReturn(Right(UpdateCategoryOutput.from("123")));
+
+        final var aMapper = this.mapper.writeValueAsString(aInput);
+
+        // when
+        final var request = put("/categories/{id}", expectedId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(aMapper);
+
+        final var response = this.mvc.perform(request)
+                .andDo(print());
+
+        // then
+        response.andExpect(status().isOk())
+                .andExpect(header().string("Location", nullValue()))
+                .andExpect(header().string("Content-Type", MediaType.APPLICATION_JSON_VALUE))
+                .andExpect(jsonPath("$.id", equalTo("123")));
+
+        verify(
+                updateCategoryUseCase,
+                times(1))
+                .execute(argThat(cmd ->
+                        Objects.equals(expectedName, cmd.name()) &&
+                                Objects.equals(expectedDescription, cmd.description()) &&
+                                Objects.equals(expectedIsActive, cmd.isActive())
+                ));
     }
 }
