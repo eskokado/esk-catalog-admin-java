@@ -317,4 +317,41 @@ public class CategoryAPITest {
                 .andExpect(jsonPath("$.errors[0].message", equalTo(expectedErrorMessage)));
 
     }
+
+    @Test
+    public void givenACommandWithInvalidID_whenCallsUpdateCategory_thenShouldReturnNotFoundException() throws Exception {
+        // given
+        final var expectedId = "not-found";
+        final String expectedName = "Filmes";
+        final var expectedDescription = "A categoria mais assistida";
+        final var expectedIsActive = true;
+        final var expectedErrorMessage = "Category with ID not-found was not found";
+        final var expectedErrorCount = 0;
+
+        final var aInput =
+                new UpdateCategoryRequest(
+                        expectedName, expectedDescription, expectedIsActive
+                );
+
+        when(updateCategoryUseCase.execute(any()))
+                .thenThrow(NotFoundException.with(Category.class, CategoryID.from(expectedId)));
+
+        final var aMapper = this.mapper.writeValueAsString(aInput);
+
+        // when
+        final var request = put("/categories/{id}", expectedId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(aMapper);
+
+        final var response = this.mvc.perform(request)
+                .andDo(print());
+
+        // then
+        response.andExpect(status().isNotFound())
+                .andExpect(header().string("Location", nullValue()))
+                .andExpect(header().string("Content-Type", MediaType.APPLICATION_JSON_VALUE))
+                .andExpect(jsonPath("$.errors", hasSize(expectedErrorCount)))
+                .andExpect(jsonPath("$.message", equalTo(expectedErrorMessage)));
+
+    }
 }
