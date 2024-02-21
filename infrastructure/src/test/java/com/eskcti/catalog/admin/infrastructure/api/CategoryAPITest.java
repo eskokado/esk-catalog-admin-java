@@ -5,6 +5,7 @@ import com.eskcti.catalog.admin.application.category.create.CreateCategoryOutput
 import com.eskcti.catalog.admin.application.category.create.CreateCategoryUseCase;
 import com.eskcti.catalog.admin.application.category.retrieve.get.CategoryOutput;
 import com.eskcti.catalog.admin.application.category.retrieve.get.GetCatetoryByIdUseCase;
+import com.eskcti.catalog.admin.application.category.update.UpdateCategoryCommand;
 import com.eskcti.catalog.admin.application.category.update.UpdateCategoryOutput;
 import com.eskcti.catalog.admin.application.category.update.UpdateCategoryUseCase;
 import com.eskcti.catalog.admin.domain.category.Category;
@@ -122,7 +123,7 @@ public class CategoryAPITest {
         response.andExpect(status().isUnprocessableEntity())
                 .andExpect(header().string("Location", Matchers.nullValue()))
                 .andExpect(header().string("Content-Type", MediaType.APPLICATION_JSON_VALUE))
-                .andExpect(jsonPath("$.errors", hasSize(1)))
+                .andExpect(jsonPath("$.errors", hasSize(expectedErrorCount)))
                 .andExpect(jsonPath("$.errors[0].message", equalTo(expectedErrorMessage)));
 
         verify(
@@ -258,7 +259,45 @@ public class CategoryAPITest {
                 );
 
         when(updateCategoryUseCase.execute(any()))
-                .thenReturn(Right(UpdateCategoryOutput.from("123")));
+                .thenReturn(Right(UpdateCategoryOutput.from(expectedId)));
+
+        final var aMapper = this.mapper.writeValueAsString(aInput);
+
+        // when
+        final var request = put("/categories/{id}", expectedId)
+                .accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(aMapper);
+
+        final var response = this.mvc.perform(request)
+                .andDo(print());
+
+        // then
+        response.andExpect(status().isOk())
+                .andExpect(header().string("Location", nullValue()))
+                .andExpect(header().string("Content-Type", MediaType.APPLICATION_JSON_VALUE))
+                .andExpect(jsonPath("$.id", equalTo(expectedId)));
+
+        verify(updateCategoryUseCase, times(1)).execute(any());
+    }
+
+    @Test
+    public void givenAnInvalidName_whenCallsUpdateCategory_thenShouldReturnDomainException() throws Exception {
+        // given
+        final var expectedId = "123";
+        final String expectedName = null;
+        final var expectedDescription = "A categoria mais assistida";
+        final var expectedIsActive = true;
+        final var expectedErrorMessage = "'name' should not be null";
+        final var expectedErrorCount = 1;
+
+        final var aInput =
+                new UpdateCategoryRequest(
+                        expectedName, expectedDescription, expectedIsActive
+                );
+
+        when(updateCategoryUseCase.execute(any()))
+                .thenReturn(Left(Notification.create(new Error(expectedErrorMessage))));
 
         final var aMapper = this.mapper.writeValueAsString(aInput);
 
@@ -271,18 +310,11 @@ public class CategoryAPITest {
                 .andDo(print());
 
         // then
-        response.andExpect(status().isOk())
+        response.andExpect(status().isUnprocessableEntity())
                 .andExpect(header().string("Location", nullValue()))
                 .andExpect(header().string("Content-Type", MediaType.APPLICATION_JSON_VALUE))
-                .andExpect(jsonPath("$.id", equalTo("123")));
+                .andExpect(jsonPath("$.errors", hasSize(expectedErrorCount)))
+                .andExpect(jsonPath("$.errors[0].message", equalTo(expectedErrorMessage)));
 
-        verify(
-                updateCategoryUseCase,
-                times(1))
-                .execute(argThat(cmd ->
-                        Objects.equals(expectedName, cmd.name()) &&
-                                Objects.equals(expectedDescription, cmd.description()) &&
-                                Objects.equals(expectedIsActive, cmd.isActive())
-                ));
     }
 }
