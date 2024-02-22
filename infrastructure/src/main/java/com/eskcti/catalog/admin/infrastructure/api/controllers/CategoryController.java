@@ -4,19 +4,20 @@ import com.eskcti.catalog.admin.application.category.create.CreateCategoryComman
 import com.eskcti.catalog.admin.application.category.create.CreateCategoryOutput;
 import com.eskcti.catalog.admin.application.category.create.CreateCategoryUseCase;
 import com.eskcti.catalog.admin.application.category.delete.DeleteCategoryUseCase;
-import com.eskcti.catalog.admin.application.category.retrieve.get.CategoryOutput;
 import com.eskcti.catalog.admin.application.category.retrieve.get.GetCatetoryByIdUseCase;
+import com.eskcti.catalog.admin.application.category.retrieve.list.ListCategoriesUseCase;
 import com.eskcti.catalog.admin.application.category.update.UpdateCategoryCommand;
 import com.eskcti.catalog.admin.application.category.update.UpdateCategoryOutput;
 import com.eskcti.catalog.admin.application.category.update.UpdateCategoryUseCase;
 import com.eskcti.catalog.admin.domain.pagination.Pagination;
+import com.eskcti.catalog.admin.domain.pagination.SearchQuery;
 import com.eskcti.catalog.admin.domain.validation.handler.Notification;
 import com.eskcti.catalog.admin.infrastructure.api.CategoryAPI;
+import com.eskcti.catalog.admin.infrastructure.category.models.CategoryListResponse;
 import com.eskcti.catalog.admin.infrastructure.category.models.CategoryResponse;
 import com.eskcti.catalog.admin.infrastructure.category.models.CreateCategoryRequest;
 import com.eskcti.catalog.admin.infrastructure.category.models.UpdateCategoryRequest;
 import com.eskcti.catalog.admin.infrastructure.category.presenters.CategoryApiPresenter;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -32,12 +33,13 @@ public class CategoryController implements CategoryAPI {
     private final GetCatetoryByIdUseCase getCatetoryByIdUseCase;
     private final UpdateCategoryUseCase updateCategoryUseCase;
     private final DeleteCategoryUseCase deleteCategoryUseCase;
-
-    public CategoryController(CreateCategoryUseCase createCategoryUseCase, GetCatetoryByIdUseCase getCatetoryByIdUseCase, UpdateCategoryUseCase updateCategoryUseCase, DeleteCategoryUseCase deleteCategoryUseCase) {
+    private final ListCategoriesUseCase listCategoriesUseCase;
+    public CategoryController(CreateCategoryUseCase createCategoryUseCase, GetCatetoryByIdUseCase getCatetoryByIdUseCase, UpdateCategoryUseCase updateCategoryUseCase, DeleteCategoryUseCase deleteCategoryUseCase, ListCategoriesUseCase listCategoriesUseCase) {
         this.createCategoryUseCase = Objects.requireNonNull(createCategoryUseCase);
         this.getCatetoryByIdUseCase = Objects.requireNonNull(getCatetoryByIdUseCase);
         this.updateCategoryUseCase = Objects.requireNonNull(updateCategoryUseCase);
         this.deleteCategoryUseCase = Objects.requireNonNull(deleteCategoryUseCase);
+        this.listCategoriesUseCase = Objects.requireNonNull(listCategoriesUseCase);
     }
 
     @Override
@@ -60,8 +62,16 @@ public class CategoryController implements CategoryAPI {
     }
 
     @Override
-    public Pagination<?> listCategories(String search, int page, int perPage, int sort, int direction) {
-        return null;
+    public Pagination<CategoryListResponse> listCategories(
+            String search,
+            int page,
+            int perPage,
+            String sort,
+            String direction
+    ) {
+        return this.listCategoriesUseCase
+                .execute(new SearchQuery(page, perPage, search, sort, direction))
+                .map(CategoryApiPresenter::present);
     }
 
     @Override
