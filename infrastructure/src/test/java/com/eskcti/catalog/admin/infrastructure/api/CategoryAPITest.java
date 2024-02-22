@@ -3,6 +3,7 @@ package com.eskcti.catalog.admin.infrastructure.api;
 import com.eskcti.catalog.admin.ControllerTest;
 import com.eskcti.catalog.admin.application.category.create.CreateCategoryOutput;
 import com.eskcti.catalog.admin.application.category.create.CreateCategoryUseCase;
+import com.eskcti.catalog.admin.application.category.delete.DeleteCategoryUseCase;
 import com.eskcti.catalog.admin.application.category.retrieve.get.CategoryOutput;
 import com.eskcti.catalog.admin.application.category.retrieve.get.GetCatetoryByIdUseCase;
 import com.eskcti.catalog.admin.application.category.update.UpdateCategoryCommand;
@@ -50,6 +51,9 @@ public class CategoryAPITest {
 
     @MockBean
     private UpdateCategoryUseCase updateCategoryUseCase;
+
+    @MockBean
+    private DeleteCategoryUseCase deleteCategoryUseCase;
 
     @Test
     public void givenAValidCommand_whenCallsCreateCategory_shouldReturnCategoryId() throws Exception {
@@ -353,5 +357,58 @@ public class CategoryAPITest {
                 .andExpect(jsonPath("$.errors", hasSize(expectedErrorCount)))
                 .andExpect(jsonPath("$.message", equalTo(expectedErrorMessage)));
 
+    }
+
+    @Test
+    public void givenAValidId_whenCallsDeleteCategory_thenShouldReturnsBeOk() throws Exception {
+        // given
+        final var expectedName = "Filmes";
+        final var expectedDescription = "A categoria mais assistida";
+        final var expectedIsActive = true;
+        final var aCategory = Category.newCategory(expectedName, expectedDescription, expectedIsActive);
+        final var expectedId = aCategory.getId();
+
+        // when
+        final var request =
+                delete("/categories/{id}", expectedId.getValue())
+                        .accept(MediaType.APPLICATION_JSON)
+                        .contentType(MediaType.APPLICATION_JSON);
+
+
+        final var response = this.mvc.perform(request)
+                .andDo(print());
+
+        // then
+        response.andExpect(status().isNoContent());
+
+        verify(
+                deleteCategoryUseCase,
+                times(1))
+                .execute(eq(expectedId.getValue()));
+    }
+
+
+    @Test
+    public void givenAnInvalidId_whenCallsDeleteCategory_thenShouldReturnsBeOk() throws Exception {
+        // given
+        final var expectedId = CategoryID.from("123");
+
+        // when
+        final var request =
+                delete("/categories/{id}", expectedId.getValue())
+                        .accept(MediaType.APPLICATION_JSON)
+                        .contentType(MediaType.APPLICATION_JSON);
+
+
+        final var response = this.mvc.perform(request)
+                .andDo(print());
+
+        // then
+        response.andExpect(status().isNoContent());
+
+        verify(
+                deleteCategoryUseCase,
+                times(1))
+                .execute(eq(expectedId.getValue()));
     }
 }
