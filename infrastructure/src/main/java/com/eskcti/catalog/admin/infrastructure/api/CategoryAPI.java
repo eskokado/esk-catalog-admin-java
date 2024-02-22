@@ -1,6 +1,7 @@
 package com.eskcti.catalog.admin.infrastructure.api;
 
 import com.eskcti.catalog.admin.domain.pagination.Pagination;
+import com.eskcti.catalog.admin.infrastructure.category.models.CategoryListResponse;
 import com.eskcti.catalog.admin.infrastructure.category.models.CategoryResponse;
 import com.eskcti.catalog.admin.infrastructure.category.models.CreateCategoryRequest;
 import com.eskcti.catalog.admin.infrastructure.category.models.UpdateCategoryRequest;
@@ -36,12 +37,12 @@ public interface CategoryAPI {
             @ApiResponse(responseCode = "422", description = "A invalid parameter was received"),
             @ApiResponse(responseCode = "500", description = "An internal server error was throw")
     })
-    Pagination<?> listCategories(
+    Pagination<CategoryListResponse> listCategories(
             @RequestParam(name = "search", required = false, defaultValue = "") final String search,
             @RequestParam(name = "page", required = false, defaultValue = "0") final int page,
             @RequestParam(name = "perPage", required = false, defaultValue = "10") final int perPage,
-            @RequestParam(name = "sort", required = false, defaultValue = "name") final int sort,
-            @RequestParam(name = "direction", required = false, defaultValue = "asc") final int direction
+            @RequestParam(name = "sort", required = false, defaultValue = "name") final String sort,
+            @RequestParam(name = "direction", required = false, defaultValue = "asc") final String direction
     );
 
     @GetMapping(
