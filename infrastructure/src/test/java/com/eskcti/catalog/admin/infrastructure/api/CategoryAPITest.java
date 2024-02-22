@@ -386,4 +386,29 @@ public class CategoryAPITest {
                 times(1))
                 .execute(eq(expectedId.getValue()));
     }
+
+
+    @Test
+    public void givenAnInvalidId_whenCallsDeleteCategory_thenShouldReturnsBeOk() throws Exception {
+        // given
+        final var expectedId = CategoryID.from("123");
+
+        // when
+        final var request =
+                delete("/categories/{id}", expectedId.getValue())
+                        .accept(MediaType.APPLICATION_JSON)
+                        .contentType(MediaType.APPLICATION_JSON);
+
+
+        final var response = this.mvc.perform(request)
+                .andDo(print());
+
+        // then
+        response.andExpect(status().isNoContent());
+
+        verify(
+                deleteCategoryUseCase,
+                times(1))
+                .execute(eq(expectedId.getValue()));
+    }
 }
