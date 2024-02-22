@@ -3,6 +3,7 @@ package com.eskcti.catalog.admin.infrastructure.api.controllers;
 import com.eskcti.catalog.admin.application.category.create.CreateCategoryCommand;
 import com.eskcti.catalog.admin.application.category.create.CreateCategoryOutput;
 import com.eskcti.catalog.admin.application.category.create.CreateCategoryUseCase;
+import com.eskcti.catalog.admin.application.category.delete.DeleteCategoryUseCase;
 import com.eskcti.catalog.admin.application.category.retrieve.get.CategoryOutput;
 import com.eskcti.catalog.admin.application.category.retrieve.get.GetCatetoryByIdUseCase;
 import com.eskcti.catalog.admin.application.category.update.UpdateCategoryCommand;
@@ -30,11 +31,13 @@ public class CategoryController implements CategoryAPI {
     private final CreateCategoryUseCase createCategoryUseCase;
     private final GetCatetoryByIdUseCase getCatetoryByIdUseCase;
     private final UpdateCategoryUseCase updateCategoryUseCase;
+    private final DeleteCategoryUseCase deleteCategoryUseCase;
 
-    public CategoryController(CreateCategoryUseCase createCategoryUseCase, GetCatetoryByIdUseCase getCatetoryByIdUseCase, UpdateCategoryUseCase updateCategoryUseCase) {
+    public CategoryController(CreateCategoryUseCase createCategoryUseCase, GetCatetoryByIdUseCase getCatetoryByIdUseCase, UpdateCategoryUseCase updateCategoryUseCase, DeleteCategoryUseCase deleteCategoryUseCase) {
         this.createCategoryUseCase = Objects.requireNonNull(createCategoryUseCase);
         this.getCatetoryByIdUseCase = Objects.requireNonNull(getCatetoryByIdUseCase);
         this.updateCategoryUseCase = Objects.requireNonNull(updateCategoryUseCase);
+        this.deleteCategoryUseCase = Objects.requireNonNull(deleteCategoryUseCase);
     }
 
     @Override
@@ -83,5 +86,10 @@ public class CategoryController implements CategoryAPI {
 
         return this.updateCategoryUseCase.execute(aCommand)
                 .fold(onError, onSuccess);
+    }
+
+    @Override
+    public void deleteById(String anId) {
+        this.deleteCategoryUseCase.execute(anId);
     }
 }
